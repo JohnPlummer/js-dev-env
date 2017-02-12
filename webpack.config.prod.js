@@ -5,9 +5,7 @@ import WebpackMd5Hash from 'webpack-md5-hash';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
 export default {
-  debug: true,
   devtool: 'source-map',
-  noInfo: false,
   entry: {
     vendor: path.resolve(__dirname, 'src/vendor'),
     main: path.resolve(__dirname, 'src/index')
@@ -20,7 +18,9 @@ export default {
   },
   plugins: [
     // Generate an external css file with a hash in the filename
-    new ExtractTextPlugin('[name].[contenthash].css'),
+    new ExtractTextPlugin({
+      filename: '[name].[contenthash].css'
+    }),
 
     // Hash the files using MD5 so that their names change when the content changes.
     new WebpackMd5Hash(),
@@ -49,16 +49,15 @@ export default {
       inject: true
     }),
 
-    // Eliminate any duplicate packages
-    new webpack.optimize.DedupePlugin(),
-
     // Minify js
-    new webpack.optimize.UglifyJsPlugin()
+    new webpack.optimize.UglifyJsPlugin({
+      sourceMap: true
+    })
   ],
   module: {
-    loaders: [
-      { test: /\.js$/, exclude: /node_modules/, loaders: ['babel'] },
-      { test: /\.css$/, loader: ExtractTextPlugin.extract('css?sourceMap') }
+    rules: [
+      { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
+      { test: /\.css$/, use: ExtractTextPlugin.extract('css?sourceMap') }
     ]
   }
 }
